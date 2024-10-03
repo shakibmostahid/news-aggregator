@@ -1,0 +1,47 @@
+name: news-aggregator-service
+
+networks:
+  default:
+    driver: bridge
+  common-net:
+    external: true
+
+services:
+  app:
+    container_name: news-aggregator-service
+    image: news-aggregator-service-image
+    build:
+      context: ../
+      dockerfile: container/Dockerfile
+    volumes:
+      - "../codes/src/storage/:/usr/src/app/src/storage/"
+    command:
+      - npm
+      - run
+      - start-api
+    env_file:
+      - ./envs/app.env
+    ports:
+      - "3000:3000"
+    networks:
+      common-net:
+        aliases:
+          - news-aggregator-service
+  worker:
+    container_name: news-content-generator-worker
+    image: news-content-generator-worker-image
+    build:
+      context: ../
+      dockerfile: container/Dockerfile
+    volumes:
+      - "../codes/src/storage/:/usr/src/app/src/storage/"
+    command:
+      - npm
+      - run
+      - start-worker
+    env_file:
+      - ./envs/app.env
+    networks:
+      common-net:
+        aliases:
+          - news-content-generator-worker
